@@ -1,7 +1,7 @@
 import json
 from os import environ
 
-from bottle import get, request, run
+from bottle import get, request, response, run
 import requests
 
 stops_from_route_id_url = 'http://gtfs-api.herokuapp.com/api/stops/metro-st-louis/%s'
@@ -26,6 +26,9 @@ def locations_near_stop(stop_geo_coords, query_term):
 
 @get('/routes/<route_id>')
 def return_bars_for_route_id(route_id):
+  response.headers['Access-Control-Allow-Origin'] = '*'
+  response.headers['Access-Control-Allow-Methods'] = 'PUT, GET, POST, DELETE, OPTIONS'
+  response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
   fs_query = request.params.get('query', 'bar')
   stops = get_stops(stops_from_route_id_url % route_id)
   route_venues = []
@@ -38,7 +41,7 @@ def return_bars_for_route_id(route_id):
         'stop_location':
           {'lat': stop['loc'][1],'long': stop['loc'][0]},
           'venues': stop_venues
-        }  
+        }
       route_venues.append(stop_with_venue)
 
   return json.dumps(route_venues)
